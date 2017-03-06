@@ -90,6 +90,7 @@ namespace Neural_Networks_Implementations
 
         private void Tester(object sender, EventArgs e)
         {
+            MessageBox.Show("Start testing the model");
             ModelTester = new TheTester(this);
         }
 

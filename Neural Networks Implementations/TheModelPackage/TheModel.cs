@@ -7,16 +7,14 @@ using System.Windows.Forms;
 
 namespace Neural_Networks_Implementations
 {
-     public class TheModel
+    public class TheModel
     {
         int epochs;
         int num_input;
-        int num_output;
         int num_training;
-        int bias;
+        public double bias;
         public int Class1, Class2; //zero based
         public int Feature1, Feature2; // zero based;
-        double num_error;
         double eta;
         double v; // Linear Combiner
         int y; // the response
@@ -31,10 +29,8 @@ namespace Neural_Networks_Implementations
         {
             this.epochs = TheMainForm.epochs;
             this.num_input = 2;
-            this.num_output = 1;
             this.num_training = TheMainForm.Data.NumberOfTrainingInstances * this.num_input;
             this.bias = TheMainForm.bias;
-            this.num_error = 0;
             this.eta = TheMainForm.eta;
             this.Class1 = TheMainForm.class1;
             this.Class2 = TheMainForm.class2;
@@ -47,9 +43,10 @@ namespace Neural_Networks_Implementations
             OldWeights = new double[num_input + 1];
             MeanSquareError = new double[epochs];
 
-            for (int i = 0; i < num_input + 1;i++ )
-                Weights[i] = 1;
-            PreProcessing(TheMainForm);
+            for (int i = 0; i < num_input + 1; i++)
+
+                Weights[i] = 0.5;
+            //PreProcessing(TheMainForm);
 
             PerceptronTrainer(TheMainForm);
         }
@@ -89,7 +86,7 @@ namespace Neural_Networks_Implementations
             if (v >= 0)
                 return 1;
             else
-                return 2;
+                return -1;
         }
         private double CalculateMeanSquareError()
         {
@@ -100,12 +97,77 @@ namespace Neural_Networks_Implementations
             return result / num_training;
         }
 
+        bool Equality()
+        {
+            for(int i=0;i<num_input + 1;i++)
+            {
+                if (Weights[i] - OldWeights[i] >= 0.1)
+                    return false;
+            }
+            return true;
+        }
         private void PerceptronTrainer(Form1 TheMainForm)
         {
             for (int i = 0; i < epochs; i++)
             {
+                OldWeights = Weights; 
                 // class 1 process
-                DeepCopyWeights();
+                for (int j = 0; j < TheMainForm.Data.NumberOfTrainingInstances; j++)
+                {
+                    if (j % 2 == 0)
+                    {
+
+                        v = Weights[0]*bias + TheMainForm.Data.TrainingData[Class1, j, Feature1] * Weights[1] +
+                            TheMainForm.Data.TrainingData[Class1, j, Feature2] * Weights[2];
+                        y = SignumActivationFunction(v);
+                        error[j] = 1 - y;
+
+                        Weights[0] = (Weights[0] + (eta * error[j] * 1)) * bias;
+                        Weights[1] = Weights[1] + (eta * error[j] * TheMainForm.Data.TrainingData[Class1, j, Feature1]);
+                        Weights[2] = Weights[2] + (eta * error[j] * TheMainForm.Data.TrainingData[Class1, j, Feature2]);
+
+
+                        v = Weights[0]*bias + TheMainForm.Data.TrainingData[Class2, j, Feature1] * Weights[1] +
+                            TheMainForm.Data.TrainingData[Class2, j, Feature2] * Weights[2];
+                        y = SignumActivationFunction(v);
+                        error[j] = -1 - y;
+
+                        Weights[0] = (Weights[0] + (eta * error[j] * 1)) * bias;
+                        Weights[1] = Weights[1] + (eta * error[j] * TheMainForm.Data.TrainingData[Class2, j, Feature1]);
+                        Weights[2] = Weights[2] + (eta * error[j] * TheMainForm.Data.TrainingData[Class2, j, Feature2]);
+
+                    }
+                    else
+                    {
+
+                        v = Weights[0]*bias + TheMainForm.Data.TrainingData[Class2, j, Feature1] * Weights[1] +
+                            TheMainForm.Data.TrainingData[Class2, j, Feature2] * Weights[2];
+                        y = SignumActivationFunction(v);
+                        error[j] = -1 - y;
+
+                        Weights[0] = (Weights[0] + (eta * error[j] * 1)) * bias;
+                        Weights[1] = Weights[1] + (eta * error[j] * TheMainForm.Data.TrainingData[Class2, j, Feature1]);
+                        Weights[2] = Weights[2] + (eta * error[j] * TheMainForm.Data.TrainingData[Class2, j, Feature2]);
+
+
+                        v = Weights[0]*bias + TheMainForm.Data.TrainingData[Class1, j, Feature1] * Weights[1] +
+                                TheMainForm.Data.TrainingData[Class1, j, Feature2] * Weights[2];
+                        y = SignumActivationFunction(v);
+                        error[j] = 1 - y;
+
+                        Weights[0] = (Weights[0] + (eta * error[j] * 1)) * bias;
+                        Weights[1] = Weights[1] + (eta * error[j] * TheMainForm.Data.TrainingData[Class1, j, Feature1]);
+                        Weights[2] = Weights[2] + (eta * error[j] * TheMainForm.Data.TrainingData[Class1, j, Feature2]);
+
+                    }
+                    if(Equality())
+                    {
+                        break;
+                    }
+                    
+                }
+
+                /*
                 for (int j = 0; j < TheMainForm.Data.NumberOfTrainingInstances; j++)
                 {
                     v = Weights[0] + TheMainForm.Data.TrainingData[Class1, j, Feature1] * Weights[1] +
@@ -119,7 +181,6 @@ namespace Neural_Networks_Implementations
                 }
 
                 // class 2 process
-                DeepCopyWeights();
                 for (int j = 0; j < TheMainForm.Data.NumberOfTrainingInstances; j++)
                 {
                     v = Weights[0] + TheMainForm.Data.TrainingData[Class2, j, Feature1] * Weights[1] +
@@ -131,7 +192,7 @@ namespace Neural_Networks_Implementations
                     Weights[1] = Weights[1] + (eta * error[j] * TheMainForm.Data.TrainingData[Class2, j, Feature1]);
                     Weights[2] = Weights[2] + (eta * error[j] * TheMainForm.Data.TrainingData[Class2, j, Feature2]);
                 }
-
+                */
                 //update the mean squared error
                 MeanSquareError[i] = CalculateMeanSquareError();
             }
