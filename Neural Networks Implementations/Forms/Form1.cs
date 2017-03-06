@@ -13,7 +13,8 @@ namespace Neural_Networks_Implementations
     public partial class Form1 : Form
     {
         public DataReader Data;
-        TheModel Model;
+        public TheModel Model;
+        TheTester ModelTester;
         public int FeatureOnX;
         public int FeatureOnY;
         public int bias ;
@@ -82,12 +83,14 @@ namespace Neural_Networks_Implementations
                 bias = 1;
             else
                 bias = 0;
+            MessageBox.Show("Training session started");
             Model = new TheModel(this);
+            MessageBox.Show("Training session ended successfully");
         }
 
         private void Tester(object sender, EventArgs e)
         {
-
+            ModelTester = new TheTester(this);
         }
 
     }
